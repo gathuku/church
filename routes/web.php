@@ -25,6 +25,15 @@ Route::post('comments/store','CommentController@store');
 
 Route::get('/excell/users','ExcellController@usersexport');
 Route::get('/excel/tithes','ExcellController@tithesexport');
+Route::post('sendemail','ExcellController@sendemail');
+Route::post('subscribe','ExcellController@subscribe');
+
+//mpesa payment Routes
+Route::get('mpesa','MpesaController@runMpesa');
+//call back route
+//Route::post('callback','MpesaController@getDataFromCallback');
+
+
 
 Route::resources([
 'profile' => 'UserController',

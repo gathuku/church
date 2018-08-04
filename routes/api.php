@@ -16,3 +16,16 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+//Route::post('callback','MpesaController@getDataFromCallback');
+
+
+/*
+Route::post('callback', function(Request $request){
+     dump($request);
+     //$data= $request->all();
+    // var_dump($data);
+
+});
+
+*/

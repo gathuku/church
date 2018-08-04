@@ -8,6 +8,8 @@
   <meta name="description" content="Free Bootstrap Theme by BootstrapMade.com">
   <meta name="keywords" content="free website templates, free bootstrap themes, free template, free bootstrap, free website template">
 
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans|Candal|Alegreya+Sans">
   <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
@@ -23,6 +25,8 @@
 
 <body>
   <!--Navigation bar-->
+
+
   <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
       <div class="navbar-header">
@@ -44,7 +48,11 @@
         </ul>
       </div>
     </div>
+     @include('partials.success')
+
   </nav>
+
+ 
   <!--/ Navigation bar-->
   <!--Modal box-->
 
@@ -439,19 +447,25 @@
       </div>
     </div>
   </section>
+
+  --}}
   <!--/ Pricing-->
   <!--Contact-->
   <section id="contact" class="section-padding">
     <div class="container">
       <div class="row">
         <div class="header-section text-center">
+
+             
+ 
           <h2>Contact Us</h2>
-          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem nesciunt vitae,<br> maiores, magni dolorum aliquam.</p>
+          <p>Send an Email to Us</p>
           <hr class="bottom-line">
         </div>
         <div id="sendmessage">Your message has been sent. Thank you!</div>
         <div id="errormessage"></div>
-        <form action="" method="post" role="form" class="contactForm">
+        <form action="{{url('sendemail')}}" method="post" role="form" class="contactForm">
+              {{csrf_field()}}
           <div class="col-md-6 col-sm-6 col-xs-12 left">
             <div class="form-group">
               <input type="text" name="name" class="form-control form" id="name" placeholder="Your Name" data-rule="minlen:4" data-msg="Please enter at least 4 chars" />
@@ -488,9 +502,11 @@
   <footer id="footer" class="footer">
     <div class="container text-center">
 
-      <h3>Start Your Free Trial Now!</h3>
+      <h3>Subscribe to Our Newsletter</h3>
 
-      <form class="mc-trial row">
+      <form class="mc-trial row" action="{{url('subscribe')}}" method="post">
+        {{@csrf_field()}}
+
         <div class="form-group col-md-3 col-md-offset-2 col-sm-4">
           <div class=" controls">
             <input name="name" placeholder="Enter Your Name" class="form-control" type="text">
@@ -499,7 +515,7 @@
         <!-- End email input -->
         <div class="form-group col-md-3 col-sm-4">
           <div class=" controls">
-            <input name="EMAIL" placeholder="Enter Your email" class="form-control" type="email">
+            <input name="email" placeholder="Enter Your email" class="form-control" type="email">
           </div>
         </div>
         <!-- End email input -->
@@ -518,7 +534,7 @@
         <li><a href="#link"><i class="fa fa-dribbble fa-fw"></i></a></li>
         <li><a href="#link"><i class="fa fa-linkedin fa-fw"></i></a></li>
       </ul>
-      ©2016 Mentor Theme. All rights reserved
+      ©2o18 Servanthoodcentre. All rights reserved
       <div class="credits">
         <!--
           All the links in the footer should remain intact.
@@ -526,7 +542,7 @@
           Licensing information: https://bootstrapmade.com/license/
           Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/buy/?theme=Mentor
         -->
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade.com</a>
+        Designed by <a href="http://gathuku.me/">Gathuku</a>
       </div>
     </div>
   </footer>
@@ -538,7 +554,7 @@
   <script src="js/custom.js"></script>
   <script src="contactform/contactform.js"></script>
 
-  --}}
+  
 
 </body>
 
