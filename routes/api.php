@@ -17,15 +17,17 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-//Route::post('callback','MpesaController@getDataFromCallback');
-
+Route::post('callback','MpesaController@getDataFromCallback');
 
 /*
 Route::post('callback', function(Request $request){
-     dump($request);
-     //$data= $request->all();
-    // var_dump($data);
+    
+    // dump($request->getContent());
+
+     \Log::info($request->getContent());
+
+
 
 });
-
 */
+

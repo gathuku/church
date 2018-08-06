@@ -54,7 +54,7 @@ integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8t
            <div class=" w3-panel  w3-cente w3-padding-left-64" >
              <br>
                   <legend class="w3-border w3-border-green">Tithe Information
-           <div class="w3-panel w3-large" style="margin-left:20%">
+           <div class="w3-panel w3-large" >
               <div class="w3-half -card-4 w3-center">
                <h4 class="w3-text-green" >My Tithe contribution</h4>
                <i class="fab fa-bitbucket fa-5x"></i>
@@ -89,11 +89,27 @@ integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8t
 
               </div>
               <div class="w3-half">
-               <h4 class="w3-text-green" >Contribute with Mpesa</h4>
-               <div class="w3-center">
-                    <i class=" fas fa-procedures fa-5x"></i>
-               </div>
+               <h4 class="w3-text-green" >Contribute With Mpesa</h4>
+               
+              <h3>1.Using Mpesa STK Push</h3>
+              <p>How it works</p> 
+              <p>When you initiate payment, a popup will appear in your phone requesting
+               you to enter your Mpesa pin.You only need to enter a valid amount in the form
+               below and click initiate button</p>
+               <p>NB: Before initiating payment make sure:-</p>
 
+               <h4 class="w3-text-green">Confirm your Phone Number {{Auth::user()->phone}}</h4>
+                 <div>
+                   @include('partials.mpesa')
+                 </div>
+               <form action="{{url('mpesa')}}" method="post">
+                  {{@csrf_field()}}
+                 <input class="w3-round-large" type="text" name="amount" placeholder="Enter Amout">
+                 <input class="w3-button w3-green" type="submit" name="submit" value="Initite Payment">
+               </form>
+               
+               <br>
+               <h3>2. Procedures Option(Without STK push)</h3>
                <ol>
                  <li> Go to the MPESA menu,</li>
                  <li>Select payment services</li>

@@ -4,19 +4,45 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+
+
 use App\User;
+use App\Transaction;
+
+use Session;
 
 class MpesaController extends Controller
 {
     //
 
     //get user Information
-    //phoneNumber=Auth::user()->phone;
-   // userName=Auth::user()->name;
+    public $partyA;
+    public $userName;
+    public $amount;
 
+   //Constructor
 
-      public function runMpesa(){
+	public function __construct(){
+		//Assingn constants
+     
+	}
+
+	//Get initiatio data
+    public function runMpesa(Request $request){
+
+    	 $this->partyA=Auth::user()->phone;
+         $this->userName=Auth::user()->name;
+         $this->amount=$request->amount;
+
+         //validate Phone Numer and Amount;
+         if ($this->amount<0) {
+         	Session::flash('error','Amount must Be Greater Than 1')
+         }
+
        $this->get_access_token();
+
+           return back()->withInput();
        }
 
 
@@ -54,9 +80,9 @@ class MpesaController extends Controller
     public function lipaNaMpesaOnline($acess_token){
       
        $lipaNaMpesapassKey='bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919';
-       $partyA='254705112855';
+      // $partyA='254705112855';
        $partyB='174379';
-       $amount='5';
+      // $amount='1';
 
 
        $timestamp  = date( 'YmdHis' );
@@ -76,12 +102,12 @@ class MpesaController extends Controller
 		  'Password' => $Password,
 		  'Timestamp' => $timestamp,
 		  'TransactionType' => 'CustomerPayBillOnline',
-		  'Amount' => $amount,
-		  'PartyA' => $partyA,
+		  'Amount' => $this->amount,
+		  'PartyA' => $this->partyA,
 		  'PartyB' => $partyB,
-		  'PhoneNumber' => $partyA,
-		  'CallBackURL' => 'https://1fdbf705.ngrok.io/callback',
-		  'AccountReference' => $partyA,
+		  'PhoneNumber' => $this->partyA,
+		  'CallBackURL' => 'https://e679b7ff.ngrok.io/api/callback',
+		  'AccountReference' => $this->partyA,
 		  'TransactionDesc' => 'Tithe payment '
 		);
 
@@ -101,16 +127,10 @@ class MpesaController extends Controller
 
          $responsecode=$response->ResponseCode;
          $responsedesc=$response->ResponseDescription;
+          
+          Session::flash('success',$responsedesc);
 
-         if ($responsecode=0) {
-         	//display a success message
-         }
-
-        // dump('completed proccessing');
-
-         //event(new payRequestSent());
-
-         $this->getDataFromCallback();
+      // return back();
     }
 
 
@@ -118,15 +138,66 @@ class MpesaController extends Controller
 
  
 
-    public function getDataFromCallback(){
-    	//$data=json_decode(file_get_contents('https://1fdbf705.ngrok.io/callback'));
-        $data=file_get_contents('php://input');
+    public function getDataFromCallback(Request $request){
+     \Log::info($request->getContent());
 
-        //dump($data);
-        dd($data);
+     $data=$request->getContent();
+    // $this->callBackCode=$data->ResultCode;
+   	$data = json_decode($data);
+	$tmp = $data->Body->stkCallback;
+	$master = array();
+	foreach($data->Body->stkCallback->CallbackMetadata->Item as $item){
+		$item = (array) $item;
+		$master[$item['Name']] = ((isset($item['Value'])) ? $item['Value'] : NULL);
+		
+	}
+	$master = (object) $master;
+	$master->ResultCode = $tmp->ResultCode;
+	$master->MerchantRequestID = $tmp->MerchantRequestID;
+	$master->CheckoutRequestID = $tmp->CheckoutRequestID;
+	$master->ResultDesc = $tmp->ResultDesc;
 
-       // Log::info("payload =>", $request->all());
+/*
+	if ($master->ResultCode) {
+		$master->Amount=$tmp->Amount;
+		$master->MpesaReceiptNumber=$tmp->MpesaReceiptNumber;
+		$master->TransactionDate=$tmp->TransactionDate;
+		$master->PhoneNumber=$tmp->PhoneNumber;
+	}
+	*/
+	
+	$resultcode=$master->ResultCode;
+	$resultDesc=$master->ResultDesc;
+	$amount=$master->Amount;
+	$MpesaReceiptNumber=$master->MpesaReceiptNumber;
+	$TransactionDate=$master->TransactionDate;
+	$PhoneNumber=$master->PhoneNumber;
 
+      if ($resultcode==0) {
+      	//save to database
+      	 $this->saveTransaction($amount,$MpesaReceiptNumber,$TransactionDate,$PhoneNumber);
+      	 Session::flash('mpesaAlert','Sucessful, Saving to Database');
+      }
+         
+      //return a description to views
+     
+    }
+
+    public function saveTransaction($amount,$MpesaReceiptNumber,$TransactionDate,$phoneNumber){
+       //\Log::info('Ready to cancel Transaction');
+        
+        //Logic to save to database Using Eloquent ORM
+
+        $savetransaction=Transaction::create([
+             'amount' => $amount,
+             'receipt_no' =>$MpesaReceiptNumber,
+             'transaction_date' =>$TransactionDate,
+             'phone_no' =>$phoneNumber
+        ]);
+
+        if ($savetransaction) {
+            Session::flash('mpesaAlert','Completed Saving to Database');
+        }
     }
   
 }
