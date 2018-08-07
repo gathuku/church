@@ -14,6 +14,9 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         //
 
-        'callback/*'
+        'callback/*',
+
+       'confirmationurl/*',
+       'validationurl/*'
     ];
 }

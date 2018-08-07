@@ -31,18 +31,18 @@ class MpesaController extends Controller
 	//Get initiatio data
     public function runMpesa(Request $request){
 
-    	 $this->partyA=Auth::user()->phone;
+    	/* $this->partyA=Auth::user()->phone;
          $this->userName=Auth::user()->name;
          $this->amount=$request->amount;
 
          //validate Phone Numer and Amount;
          if ($this->amount<0) {
-         	Session::flash('error','Amount must Be Greater Than 1')
-         }
+         	Session::flash('error','Amount must Be Greater Than 1');
+         }*/
 
        $this->get_access_token();
 
-           return back()->withInput();
+           //return back()->withInput();
        }
 
 
@@ -70,8 +70,10 @@ class MpesaController extends Controller
 			  $token=$response->access_token;
 
 			
-			//return($token);
-			  $this->lipaNaMpesaOnline($token);
+			
+			 // $this->lipaNaMpesaOnline($token);
+			  $this->registerC2BUrls($token);
+			  $this->simulateC2B($token);
 
 
     }
@@ -139,6 +141,7 @@ class MpesaController extends Controller
  
 
     public function getDataFromCallback(Request $request){
+    	\Log::info('receiving call back');
      \Log::info($request->getContent());
 
      $data=$request->getContent();
@@ -157,15 +160,7 @@ class MpesaController extends Controller
 	$master->CheckoutRequestID = $tmp->CheckoutRequestID;
 	$master->ResultDesc = $tmp->ResultDesc;
 
-/*
-	if ($master->ResultCode) {
-		$master->Amount=$tmp->Amount;
-		$master->MpesaReceiptNumber=$tmp->MpesaReceiptNumber;
-		$master->TransactionDate=$tmp->TransactionDate;
-		$master->PhoneNumber=$tmp->PhoneNumber;
-	}
-	*/
-	
+	//get data from master array
 	$resultcode=$master->ResultCode;
 	$resultDesc=$master->ResultDesc;
 	$amount=$master->Amount;
@@ -176,7 +171,7 @@ class MpesaController extends Controller
       if ($resultcode==0) {
       	//save to database
       	 $this->saveTransaction($amount,$MpesaReceiptNumber,$TransactionDate,$PhoneNumber);
-      	 Session::flash('mpesaAlert','Sucessful, Saving to Database');
+      	 Session::flash('success','Sucessful, Saving to Database');
       }
          
       //return a description to views
@@ -196,8 +191,76 @@ class MpesaController extends Controller
         ]);
 
         if ($savetransaction) {
-            Session::flash('mpesaAlert','Completed Saving to Database');
+            Session::flash('success','Completed Saving to Database');
         }
     }
+
+
+    public function registerC2BUrls($acess_token){
+    	$url = 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl';
+
+			$curl = curl_init();
+			curl_setopt($curl, CURLOPT_URL, $url);
+			curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:Bearer '.$acess_token)); //setting custom header
+
+
+			$curl_post_data = array(
+			  //Fill in the request parameters with valid values
+			  'ShortCode' => '174379',
+			  'ResponseType' => 'Completed',
+			  'ConfirmationURL' => 'https://a12c6853.ngrok.io/api/confirmationurl',
+			  'ValidationURL' => 'https://a12c6853.ngrok.io/api/validationurl'
+			);
+
+			$data_string = json_encode($curl_post_data);
+
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($curl, CURLOPT_POST, true);
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
+
+			$curl_response = curl_exec($curl);
+			print_r($curl_response);
+
+         echo $curl_response;
+    }
+
+
+    public function simulateC2B($acess_token){
+
+			  $url = 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate';
+
+			  $curl = curl_init();
+			  curl_setopt($curl, CURLOPT_URL, $url);
+			  curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json','Authorization:Bearer '.$acess_token)); //setting custom header
+
+
+			  $curl_post_data = array(
+			          //Fill in the request parameters with valid values
+			         'ShortCode' => '174379',
+			         'CommandID' => 'CustomerPayBillOnline',
+			         'Amount' => '1',
+			         'Msisdn' => '254705112855',
+			         'BillRefNumber' => '00000'
+			  );
+
+			  $data_string = json_encode($curl_post_data);
+
+			  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+			  curl_setopt($curl, CURLOPT_POST, true);
+			  curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
+
+			  $curl_response = curl_exec($curl);
+			  print_r($curl_response);
+
+			  echo $curl_response;
+			  \Log::info('waiting for response');
+	 }
+
+
+	 public function receiveresponse(Request $request){
+	 	return response()->json([
+       'C2BPaymentConfirmationResult' => 'Success'
+     ]);
+	 }
   
 }

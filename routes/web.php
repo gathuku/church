@@ -29,9 +29,8 @@ Route::post('sendemail','ExcellController@sendemail');
 Route::post('subscribe','ExcellController@subscribe');
 
 //mpesa payment Routes
-Route::post('mpesa','MpesaController@runMpesa');
-//call back route
-//Route::post('callback','MpesaController@getDataFromCallback');
+Route::get('mpesa','MpesaController@runMpesa');
+
 
 
 
