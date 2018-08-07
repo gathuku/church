@@ -9,6 +9,9 @@
 namespace App\Gateways;
 
 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+
 class Mpesa
 {
     protected $payload = [];
@@ -18,6 +21,8 @@ class Mpesa
     protected $expires_in = null;
     protected $authed_at = null;
 
+    //Todo::move this to the env
+    //Todo::make a laravel command to handle registration of urls
     const CONFIRMATION_URL = "https://someurl.com/api/confirm";
     const VALIDATION_URL = "https://someurl.com/api/validate";
 
@@ -147,7 +152,7 @@ class Mpesa
             CURLOPT_HTTPHEADER, [
             'Content-Type:application/json',
             "Authorization:Bearer {$this->access_token}"
-        ]); //setting custom header
+        ]);
 
 
         $curl_post_data = $this->payload;
@@ -233,6 +238,32 @@ class Mpesa
         ];
 
         return $this;
+    }
+
+
+    public static function process_stk($payload)
+    {
+        Log::info("This I received", $payload);
+
+        try {
+            $data = $payload;
+            $meta = $data['Body']['stkCallback']['CallbackMetadata']["Item"];
+
+            $data = [
+                "amount" => $meta[0]['Value'],
+                "receipt_no" => $meta['1']["Value"],
+                "phone_no" => $meta['4']['Value'],
+                "transaction_date" => Carbon::parse($meta['3']['Value'])
+            ];
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error("This is Why We Cant process payment => {$e->getMessage()}");
+
+            return false;
+        }
+
+
     }
 
 }
