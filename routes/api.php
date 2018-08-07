@@ -19,7 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 //Route::post('callback','MpesaController@getDataFromCallback');
 
-Route::post('confirmationurl','MpesaController@getDataFromCallback');
+//Route::post('confirmationurl','MpesaController@getDataFromCallback');
 
 Route::post('validationurl','MpesaController@receiveresponse');
 Route::any("stk_push", "MpesaController@stk");
