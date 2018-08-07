@@ -27,11 +27,12 @@ class Mpesa
      *
      * Mpesa constructor.
      * @param bool $auth
+     * @throws \Exception
      */
     public function __construct($auth = true)
     {
         if ($auth)
-            $this->auth;
+            $this->auth();
     }
 
     /**
