@@ -22,5 +22,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('confirmationurl','MpesaController@getDataFromCallback');
 
 Route::post('validationurl','MpesaController@receiveresponse');
+Route::any("stk_push", "MpesaController@stk");
+Route::any("c2b_simulate", "MpesaController@simulate_c2b");
 
 
