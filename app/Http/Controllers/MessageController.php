@@ -17,8 +17,8 @@ class MessageController extends Controller
     public function index()
     {
 
-     $user=User::all();
-     $message=DB::table('messages')
+     $user= User::all();
+     $message= DB::table('messages')
                   ->join('users','users.id','=','messages.sent_by')
                   ->select('messages.message','users.name','messages.created_at')
                   ->where('sent_to',Auth::User()->id)
@@ -45,7 +45,7 @@ class MessageController extends Controller
      */
     public function store(Request $request)
     {
-        $storemessage=Messsage::create([
+        $storemessage = Messsage::create([
           'sent_by' => $request->input('sent_by'),
           'sent_to' =>$request->input('sent_to'),
           'message' =>$request->input('message'),

@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use App\User;
 use App\Transaction;
 
-use Session;
+use Illuminate\Support\Facades\Session;
+
 
 class MpesaController extends Controller
 {
